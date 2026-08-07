@@ -166,20 +166,87 @@
     if (moved) { e.stopPropagation(); e.preventDefault(); }
   }, true);
 
-  /* ── Hero video: 자막 없는 밝은 구간(2~12초)만 반복 ── */
-  var heroClip = document.querySelector('.hero__video');
-  if (heroClip) {
-    var SEG_START = 0.5, SEG_END = 8.4;
-    var seekToStart = function () {
-      if (heroClip.readyState >= 1) heroClip.currentTime = SEG_START;
-    };
-    heroClip.addEventListener('loadedmetadata', seekToStart);
-    seekToStart();
-    heroClip.addEventListener('timeupdate', function () {
-      if (heroClip.currentTime >= SEG_END || heroClip.currentTime < SEG_START - 0.5) {
-        heroClip.currentTime = SEG_START;
+  /* ── Hero: 자막 없는 구간들을 이어 붙인 몽타주 재생 ── */
+  var layerA = document.getElementById('heroLayerA');
+  var layerB = document.getElementById('heroLayerB');
+  if (layerA && layerB) {
+    var SEGS = [
+      { src: 'assets/video/train-2.mp4', start: 0.6, end: 4.6 },   // 드라이버 풀스윙 (하늘)
+      { src: 'assets/video/train-5.mp4', start: 0.6, end: 7.8 },   // 주니어 레인지 스윙
+      { src: 'assets/video/train-4.mp4', start: 5.0, end: 11.0 },  // 벙커 훈련
+      { src: 'assets/video/train-1.mp4', start: 1.1, end: 3.4 }    // 필드 스윙
+    ];
+    var layers = [layerA, layerB];
+    var cur = 0;      // 현재 재생 중인 세그먼트
+    var frontI = 0;   // 앞에 보이는 레이어
+    var lock = false;
+
+    function safePlay(v) {
+      var p = v.play();
+      if (p && p.catch) p.catch(function () {});
+    }
+
+    // 레이어에 세그먼트를 로드하고 시작 지점으로 이동
+    function setSeg(v, seg, cb) {
+      var apply = function () {
+        try { v.currentTime = seg.start; } catch (e) {}
+        v._seg = seg;
+        if (cb) cb();
+      };
+      if (v.getAttribute('data-seg-src') !== seg.src) {
+        v.setAttribute('data-seg-src', seg.src);
+        v.src = seg.src;
+        v.addEventListener('loadeddata', apply, { once: true });
+        v.load();
+      } else {
+        apply();
       }
+    }
+
+    function advance() {
+      if (lock) return;
+      lock = true;
+      cur = (cur + 1) % SEGS.length;
+      var seg = SEGS[cur];
+      var oldFront = layers[frontI];
+      frontI = 1 - frontI;
+      var newFront = layers[frontI];
+      setSeg(newFront, seg, function () {
+        // 시작 지점 seek가 끝난 뒤에만 화면을 전환해 자막 프레임 노출을 방지
+        var show = function () {
+          safePlay(newFront);
+          newFront.classList.add('is-front');
+          oldFront.classList.remove('is-front');
+          setTimeout(function () {
+            oldFront.pause();
+            setSeg(oldFront, SEGS[(cur + 1) % SEGS.length]);
+            lock = false;
+          }, 750);
+        };
+        if (Math.abs(newFront.currentTime - seg.start) > 0.3) {
+          newFront.addEventListener('seeked', show, { once: true });
+          newFront.currentTime = seg.start;
+          // seek 이벤트가 오지 않는 예외 상황 방어
+          setTimeout(function () { if (lock && !newFront.classList.contains('is-front')) show(); }, 800);
+        } else {
+          show();
+        }
+      });
+    }
+
+    layers.forEach(function (v) {
+      v.addEventListener('timeupdate', function () {
+        if (lock || layers[frontI] !== v || !v._seg) return;
+        if (v.currentTime >= v._seg.end) advance();
+      });
+      // 세그먼트 끝을 넘어 영상이 끝나버린 경우 방어
+      v.addEventListener('ended', function () {
+        if (layers[frontI] === v) advance();
+      });
     });
+
+    setSeg(layerA, SEGS[0], function () { safePlay(layerA); });
+    setSeg(layerB, SEGS[1]);
   }
 
   /* ── Hero parallax ── */
