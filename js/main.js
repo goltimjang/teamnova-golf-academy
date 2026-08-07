@@ -139,7 +139,11 @@
       });
       if (wasMuted) {
         video.muted = false;
-        video.play().catch(function () {});
+        video.play().catch(function () {
+          // 소리 재생이 막힌 환경에서는 무음으로라도 재생
+          video.muted = true;
+          video.play().catch(function () {});
+        });
         clip.classList.add('is-playing');
       }
     });
@@ -163,7 +167,7 @@
     scroller.scrollLeft = scrollLeft - dx;
   });
   scroller.addEventListener('click', function (e) {
-    if (moved) { e.stopPropagation(); e.preventDefault(); }
+    if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
   }, true);
 
   /* ── Hero: 자막 없는 구간들을 이어 붙인 몽타주 재생 ── */
