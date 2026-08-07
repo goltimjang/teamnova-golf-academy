@@ -169,7 +169,7 @@
   /* ── Hero video: 자막 없는 밝은 구간(2~12초)만 반복 ── */
   var heroClip = document.querySelector('.hero__video');
   if (heroClip) {
-    var SEG_START = 2, SEG_END = 6.5;
+    var SEG_START = 0.5, SEG_END = 8.4;
     var seekToStart = function () {
       if (heroClip.readyState >= 1) heroClip.currentTime = SEG_START;
     };
