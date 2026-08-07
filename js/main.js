@@ -175,10 +175,10 @@
   var layerB = document.getElementById('heroLayerB');
   if (layerA && layerB) {
     var SEGS = [
-      { src: 'assets/video/train-2.mp4', start: 1.2, end: 4.6 },   // 드라이버 풀스윙 (하늘)
-      { src: 'assets/video/train-5.mp4', start: 4.2, end: 8.0 },   // 주니어 레인지 스윙
-      { src: 'assets/video/train-4.mp4', start: 6.2, end: 11.0 },  // 벙커 훈련
-      { src: 'assets/video/train-1.mp4', start: 1.1, end: 3.4 }    // 필드 스윙
+      { src: 'assets/video/train-2.mp4', start: 1.2, end: 3.0 },   // 드라이버 스윙 (하늘 추적 전까지)
+      { src: 'assets/video/train-5.mp4', start: 4.2, end: 7.2 },   // 주니어 레인지 스윙
+      { src: 'assets/video/train-4.mp4', start: 6.2, end: 10.5 },  // 벙커 훈련
+      { src: 'assets/video/train-1.mp4', start: 1.1, end: 2.8 }    // 필드 스윙
     ];
     var layers = [layerA, layerB];
     var cur = 0;      // 현재 재생 중인 세그먼트
@@ -219,10 +219,11 @@
         // 시작 지점 seek가 끝난 뒤에만 화면을 전환해 자막 프레임 노출을 방지
         var show = function () {
           safePlay(newFront);
+          // 이전 영상은 즉시 정지 — 페이드 중 자막 구간 침범 방지 (마지막 프레임 위로 페이드)
+          oldFront.pause();
           newFront.classList.add('is-front');
           oldFront.classList.remove('is-front');
           setTimeout(function () {
-            oldFront.pause();
             setSeg(oldFront, SEGS[(cur + 1) % SEGS.length]);
             lock = false;
           }, 750);
