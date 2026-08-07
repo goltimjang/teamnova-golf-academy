@@ -171,9 +171,9 @@
   var layerB = document.getElementById('heroLayerB');
   if (layerA && layerB) {
     var SEGS = [
-      { src: 'assets/video/train-2.mp4', start: 0.6, end: 4.6 },   // 드라이버 풀스윙 (하늘)
-      { src: 'assets/video/train-5.mp4', start: 0.6, end: 7.8 },   // 주니어 레인지 스윙
-      { src: 'assets/video/train-4.mp4', start: 5.0, end: 11.0 },  // 벙커 훈련
+      { src: 'assets/video/train-2.mp4', start: 1.2, end: 4.6 },   // 드라이버 풀스윙 (하늘)
+      { src: 'assets/video/train-5.mp4', start: 4.2, end: 8.0 },   // 주니어 레인지 스윙
+      { src: 'assets/video/train-4.mp4', start: 6.2, end: 11.0 },  // 벙커 훈련
       { src: 'assets/video/train-1.mp4', start: 1.1, end: 3.4 }    // 필드 스윙
     ];
     var layers = [layerA, layerB];
