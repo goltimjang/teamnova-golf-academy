@@ -170,116 +170,23 @@
     if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
   }, true);
 
-  /* ── Hero: 자막 없는 구간들을 이어 붙인 몽타주 재생 ── */
-  var layerA = document.getElementById('heroLayerA');
-  var layerB = document.getElementById('heroLayerB');
-  if (layerA && layerB) {
-    var SEGS = [
-      { src: 'assets/video/train-2.mp4', start: 1.2, end: 3.0 },   // 드라이버 스윙 (하늘 추적 전까지)
-      { src: 'assets/video/train-5.mp4', start: 4.2, end: 7.2 },   // 주니어 레인지 스윙
-      { src: 'assets/video/train-4.mp4', start: 6.2, end: 10.5 },  // 벙커 훈련
-      { src: 'assets/video/train-1.mp4', start: 1.1, end: 2.8 }    // 필드 스윙
-    ];
-    var layers = [layerA, layerB];
-    var cur = 0;      // 현재 재생 중인 세그먼트
-    var frontI = 0;   // 앞에 보이는 레이어
-    var lock = false;
-
+  /* ── Hero: 30초 편집 영상 루프 재생 ── */
+  var heroLayerA = document.getElementById('heroLayerA');
+  if (heroLayerA) {
     function safePlay(v) {
       var p = v.play();
       if (p && p.catch) p.catch(function () {});
     }
-
-    // 데이터가 준비된 경우에만 시작 지점으로 이동 (미준비 seek는 고착 위험)
-    function seekToStart(v) {
-      if (v._seg && v.readyState >= 2 && !v.seeking) {
-        try { v.currentTime = v._seg.start; } catch (e) {}
-      }
-    }
-
-    // 레이어에 세그먼트를 로드하고, 준비됐으면 시작 지점으로 이동.
-    // iOS는 재생 전까지 로드를 미루므로 콜백은 로드를 기다리지 않고 즉시 실행 —
-    // 시작 지점 보정은 seekToStart와 timeupdate가 재생 중에 이어받는다.
-    function setSeg(v, seg, cb) {
-      v._seg = seg;
-      var absSrc = new URL(seg.src, location.href).href;
-      if (v.currentSrc !== absSrc && v.src !== absSrc) {
-        // 실제로 다른 영상일 때만 교체 — 이미 로딩 중인 영상에 load()를 다시 걸면 로딩이 멈출 수 있다
-        v.setAttribute('data-seg-src', seg.src);
-        v.src = seg.src;
-        v.load();
-        v.addEventListener('loadeddata', function () { seekToStart(v); }, { once: true });
-      } else {
-        v.setAttribute('data-seg-src', seg.src);
-        if (v.readyState >= 2) seekToStart(v);
-        else v.addEventListener('loadeddata', function () { seekToStart(v); }, { once: true });
-      }
-      if (cb) cb();
-    }
-
-    function advance() {
-      if (lock) return;
-      lock = true;
-      cur = (cur + 1) % SEGS.length;
-      var seg = SEGS[cur];
-      var oldFront = layers[frontI];
-      frontI = 1 - frontI;
-      var newFront = layers[frontI];
-      setSeg(newFront, seg, function () {
-        // 시작 지점 seek가 끝난 뒤에만 화면을 전환해 자막 프레임 노출을 방지
-        var show = function () {
-          safePlay(newFront);
-          // 이전 영상은 즉시 정지 — 페이드 중 자막 구간 침범 방지 (마지막 프레임 위로 페이드)
-          oldFront.pause();
-          newFront.classList.add('is-front');
-          oldFront.classList.remove('is-front');
-          setTimeout(function () {
-            setSeg(oldFront, SEGS[(cur + 1) % SEGS.length]);
-            lock = false;
-          }, 750);
-        };
-        if (newFront.readyState >= 2 && Math.abs(newFront.currentTime - seg.start) > 0.3) {
-          newFront.addEventListener('seeked', show, { once: true });
-          newFront.currentTime = seg.start;
-          // seek 이벤트가 오지 않는 예외 상황 방어
-          setTimeout(function () { if (lock && !newFront.classList.contains('is-front')) show(); }, 800);
-        } else {
-          show();
-        }
-      });
-    }
-
-    layers.forEach(function (v) {
-      v.addEventListener('timeupdate', function () {
-        if (!v._seg || v.seeking) return;
-        // 세그먼트 시작 전 위치에서 재생 중이면 시작 지점으로 (iOS 네이티브 자동재생이 0초부터 시작한 경우)
-        if (v.currentTime < v._seg.start - 0.6) {
-          seekToStart(v);
-          return;
-        }
-        if (lock || layers[frontI] !== v) return;
-        if (v.currentTime >= v._seg.end) advance();
-      });
-      // 세그먼트 끝을 넘어 영상이 끝나버린 경우 방어
-      v.addEventListener('ended', function () {
-        if (layers[frontI] === v) advance();
-      });
-    });
-
-    setSeg(layerA, SEGS[0], function () { safePlay(layerA); });
-    setSeg(layerB, SEGS[1]);
-    safePlay(layerA); // 로드 이벤트와 무관하게 즉시 재생 시도
-
+    safePlay(heroLayerA);
     // 자동재생이 차단된 환경(저전력 모드 등): 첫 터치/스크롤에서 재생 재개
-    function resumeFront() {
-      var f = layers[frontI];
-      if (f.paused) safePlay(f);
+    function resumeHero() {
+      if (heroLayerA.paused) safePlay(heroLayerA);
     }
     ['touchstart', 'click', 'scroll'].forEach(function (ev) {
-      window.addEventListener(ev, resumeFront, { once: true, passive: true });
+      window.addEventListener(ev, resumeHero, { once: true, passive: true });
     });
     document.addEventListener('visibilitychange', function () {
-      if (!document.hidden) resumeFront();
+      if (!document.hidden) resumeHero();
     });
   }
 
