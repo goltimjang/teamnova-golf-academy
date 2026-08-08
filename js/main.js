@@ -190,21 +190,31 @@
       if (p && p.catch) p.catch(function () {});
     }
 
-    // 레이어에 세그먼트를 로드하고 시작 지점으로 이동
+    // 데이터가 준비된 경우에만 시작 지점으로 이동 (미준비 seek는 고착 위험)
+    function seekToStart(v) {
+      if (v._seg && v.readyState >= 2 && !v.seeking) {
+        try { v.currentTime = v._seg.start; } catch (e) {}
+      }
+    }
+
+    // 레이어에 세그먼트를 로드하고, 준비됐으면 시작 지점으로 이동.
+    // iOS는 재생 전까지 로드를 미루므로 콜백은 로드를 기다리지 않고 즉시 실행 —
+    // 시작 지점 보정은 seekToStart와 timeupdate가 재생 중에 이어받는다.
     function setSeg(v, seg, cb) {
-      var apply = function () {
-        try { v.currentTime = seg.start; } catch (e) {}
-        v._seg = seg;
-        if (cb) cb();
-      };
-      if (v.getAttribute('data-seg-src') !== seg.src) {
+      v._seg = seg;
+      var absSrc = new URL(seg.src, location.href).href;
+      if (v.currentSrc !== absSrc && v.src !== absSrc) {
+        // 실제로 다른 영상일 때만 교체 — 이미 로딩 중인 영상에 load()를 다시 걸면 로딩이 멈출 수 있다
         v.setAttribute('data-seg-src', seg.src);
         v.src = seg.src;
-        v.addEventListener('loadeddata', apply, { once: true });
         v.load();
+        v.addEventListener('loadeddata', function () { seekToStart(v); }, { once: true });
       } else {
-        apply();
+        v.setAttribute('data-seg-src', seg.src);
+        if (v.readyState >= 2) seekToStart(v);
+        else v.addEventListener('loadeddata', function () { seekToStart(v); }, { once: true });
       }
+      if (cb) cb();
     }
 
     function advance() {
@@ -228,7 +238,7 @@
             lock = false;
           }, 750);
         };
-        if (Math.abs(newFront.currentTime - seg.start) > 0.3) {
+        if (newFront.readyState >= 2 && Math.abs(newFront.currentTime - seg.start) > 0.3) {
           newFront.addEventListener('seeked', show, { once: true });
           newFront.currentTime = seg.start;
           // seek 이벤트가 오지 않는 예외 상황 방어
@@ -241,7 +251,13 @@
 
     layers.forEach(function (v) {
       v.addEventListener('timeupdate', function () {
-        if (lock || layers[frontI] !== v || !v._seg) return;
+        if (!v._seg || v.seeking) return;
+        // 세그먼트 시작 전 위치에서 재생 중이면 시작 지점으로 (iOS 네이티브 자동재생이 0초부터 시작한 경우)
+        if (v.currentTime < v._seg.start - 0.6) {
+          seekToStart(v);
+          return;
+        }
+        if (lock || layers[frontI] !== v) return;
         if (v.currentTime >= v._seg.end) advance();
       });
       // 세그먼트 끝을 넘어 영상이 끝나버린 경우 방어
@@ -252,6 +268,19 @@
 
     setSeg(layerA, SEGS[0], function () { safePlay(layerA); });
     setSeg(layerB, SEGS[1]);
+    safePlay(layerA); // 로드 이벤트와 무관하게 즉시 재생 시도
+
+    // 자동재생이 차단된 환경(저전력 모드 등): 첫 터치/스크롤에서 재생 재개
+    function resumeFront() {
+      var f = layers[frontI];
+      if (f.paused) safePlay(f);
+    }
+    ['touchstart', 'click', 'scroll'].forEach(function (ev) {
+      window.addEventListener(ev, resumeFront, { once: true, passive: true });
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) resumeFront();
+    });
   }
 
   /* ── Hero parallax ── */
