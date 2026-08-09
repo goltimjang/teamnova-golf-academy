@@ -208,6 +208,44 @@
     });
   }
 
+  /* ── 성과 섹션: 수상 사진 슬라이더 ── */
+  var rSlider = document.getElementById('resultsSlider');
+  var rDots = document.getElementById('resultsDots');
+  if (rSlider && rDots) {
+    var rImgs = rSlider.querySelectorAll('img');
+    var rCur = 0;
+    rImgs.forEach(function (_, i) {
+      var d = document.createElement('span');
+      if (i === 0) d.classList.add('is-on');
+      d.addEventListener('click', function () { rGo(i); rHold(); });
+      rDots.appendChild(d);
+    });
+    var rDotEls = rDots.querySelectorAll('span');
+    function rGo(i) {
+      rCur = (i + rImgs.length) % rImgs.length;
+      rSlider.scrollTo({ left: rSlider.clientWidth * rCur, behavior: 'smooth' });
+    }
+    function rMark() {
+      var i = Math.round(rSlider.scrollLeft / rSlider.clientWidth);
+      if (i !== rCur) rCur = i;
+      rDotEls.forEach(function (d, n) { d.classList.toggle('is-on', n === rCur); });
+    }
+    rSlider.addEventListener('scroll', function () { requestAnimationFrame(rMark); }, { passive: true });
+    // 4.5초마다 자동 넘김 — 사용자가 직접 넘기면 잠시 멈춤
+    var rPaused = false, rTimer = null;
+    function rHold() {
+      rPaused = true;
+      clearTimeout(rTimer);
+      rTimer = setTimeout(function () { rPaused = false; }, 8000);
+    }
+    rSlider.addEventListener('touchstart', rHold, { passive: true });
+    rSlider.addEventListener('mousedown', rHold);
+    rSlider.addEventListener('wheel', rHold, { passive: true });
+    setInterval(function () {
+      if (!rPaused && document.visibilityState === 'visible') rGo(rCur + 1);
+    }, 4500);
+  }
+
   /* ── Hero parallax ── */
   var heroVideo = document.querySelector('.hero__video');
   var heroContent = document.querySelector('.hero__content');
