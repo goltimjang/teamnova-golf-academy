@@ -157,6 +157,19 @@ em { font-style: normal; }
   transition: opacity .7s ease;
 }
 .hero__video.is-front { opacity: 1; }
+/* PC: 세로 영상은 원본 비율로 가운데, 좌우 여백은 블러 확대 영상으로 채움 */
+.hero__video--bg { display: none; }
+@media (min-width: 900px) {
+  .hero__video--bg {
+    display: block; opacity: 1;
+    filter: blur(26px) brightness(.72) saturate(1.05);
+    transform: scale(1.18);
+  }
+  .hero__video.is-front {
+    object-fit: contain;
+    object-position: center center;
+  }
+}
 .hero__overlay {
   position: absolute; inset: 0;
   background:

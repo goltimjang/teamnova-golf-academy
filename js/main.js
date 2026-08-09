@@ -170,17 +170,35 @@
     if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
   }, true);
 
-  /* ── Hero: 30초 편집 영상 루프 재생 ── */
+  /* ── Hero: 30초 편집 영상 루프 재생 (PC는 블러 배경 레이어 동시 재생) ── */
   var heroLayerA = document.getElementById('heroLayerA');
+  var heroBg = document.getElementById('heroBg');
+  var heroWide = window.matchMedia('(min-width: 900px)');
   if (heroLayerA) {
     function safePlay(v) {
       var p = v.play();
       if (p && p.catch) p.catch(function () {});
     }
+    function bgActive() { return heroBg && heroWide.matches; }
     safePlay(heroLayerA);
+    if (bgActive()) safePlay(heroBg);
+    // 화면 폭이 바뀌면(창 크기 조절) 블러 배경 재생/정지 전환
+    var onWide = function () {
+      if (!heroBg) return;
+      if (heroWide.matches) { heroBg.currentTime = heroLayerA.currentTime; safePlay(heroBg); }
+      else heroBg.pause();
+    };
+    if (heroWide.addEventListener) heroWide.addEventListener('change', onWide);
+    // 블러 배경이 본 영상과 어긋나면 주기적으로 맞춤
+    setInterval(function () {
+      if (bgActive() && !heroBg.paused && Math.abs(heroBg.currentTime - heroLayerA.currentTime) > 0.3) {
+        heroBg.currentTime = heroLayerA.currentTime;
+      }
+    }, 2000);
     // 자동재생이 차단된 환경(저전력 모드 등): 첫 터치/스크롤에서 재생 재개
     function resumeHero() {
       if (heroLayerA.paused) safePlay(heroLayerA);
+      if (bgActive() && heroBg.paused) safePlay(heroBg);
     }
     ['touchstart', 'click', 'scroll'].forEach(function (ev) {
       window.addEventListener(ev, resumeHero, { once: true, passive: true });
