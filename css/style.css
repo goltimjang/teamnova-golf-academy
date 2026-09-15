@@ -683,6 +683,12 @@ body.is-loaded .hero__badges { transform: none; opacity: 1; }
   box-shadow: var(--shadow-sm);
   transition: transform .5s var(--ease), box-shadow .5s, border-color .4s;
 }
+/* 가로(16:9) 영상용 카드 — 시상식 등 가로 촬영 영상 */
+.clip--wide {
+  flex: 0 0 min(560px, 88vw);
+  aspect-ratio: 16/9;
+  align-self: center;
+}
 .clip:hover {
   transform: translateY(-8px);
   box-shadow: var(--shadow-lg);
