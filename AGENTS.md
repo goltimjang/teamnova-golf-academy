@@ -68,6 +68,6 @@ naver2fe6f2a29fa938e68d0504beffbb1c78.html ← 네이버 소유확인 파일. �
 
 ## 알려진 이슈
 
-- **HTTPS 인증서**: GitHub Pages의 teamnova.kr 인증서 발급이 지연되는 문제가 있음. `CNAME` 파일과 도메인·DNS를 임의 변경하지 말 것. 인증서 문제 해결을 사용자가 요청한 경우 GitHub 공식 진단과 절차를 따르고 결과를 확인할 것. http://teamnova.kr 은 정상.
+- **HTTPS 복구 완료 (2026-10-30)**: GitHub 공식 절차로 도메인 연결을 재등록해 인증서를 재발급했고 `https_enforced=true`를 적용. `https://teamnova.kr` 정상, `https://www.teamnova.kr` 및 HTTP 주소는 HTTPS 기본 주소로 301 이동함을 인증서 검증을 켠 상태에서 확인. 기존 가비아 DNS와 GitHub Pages 배포를 유지. 향후 오류 시 인증서·DNS·실제 접속을 다시 확인하며, 정상 도메인을 반복 제거·재등록하지 말 것.
 - **카카오 상담**: 2026-10-06 사용자가 제공한 https://open.kakao.com/o/sQuteHHi 에서 "팀노바골프아카데미" 1:1 오픈채팅 페이지를 확인해 상담 버튼 4곳에 반영. 기존 임시 pf.kakao.com 주소를 다시 사용하지 말 것.
 - 네이버 검색 노출은 서치어드바이저(소유확인·사이트맵 제출) 기준으로 관리 중.
