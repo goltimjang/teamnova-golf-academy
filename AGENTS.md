@@ -65,7 +65,8 @@ naver2fe6f2a29fa938e68d0504beffbb1c78.html ← 네이버 소유확인 파일. �
 - 주소: 김포시 김포한강4로 176 한대프라자 6층 (SJ골프아카데미)
 - 수업 장소: 한강골프랜드(야외), SJ골프아카데미(실내), 한양파인 컨트리클럽(필드, 독점)
 - 강지율 선수 수상: 강화교육장배 우승(3언더파 69타) · 대교 마이다스 우승 · KJGA컵 우승 · KYGA 옥타미녹스배 3위
-- 이주영 원장: 사용자 제공 사진 `assets/img/lee-jooyoung-profile.jpg`. 2026-11-25 사용자 제공 이력: KPGA 투어프로 정회원 / Canadian Tour 2008 / Asian Tour Circuit 2011 / JGTO conditional tour card 2016 / 국가상비군 배출 / KLPGA 시드권자 복수 배출. 이력 문구와 연도는 임의로 확대·변경하지 말 것.
+- 이주영 원장: 사용자 제공 사진 `assets/img/lee-jooyoung-profile.jpg`. 2026-11-25 사용자 제공 이력: KPGA 투어프로 정회원 / Canadian Tour 2008 / Asian Tour Circuit 2011 / JGTO conditional tour card 2016 / 국가상비군 배출 / KLPGA 시드권자 복수 배출 / KPGA/KLPGA 투어프로 다수 배출. 이력 문구와 연도는 임의로 확대·변경하지 말 것.
+- 지도진 KPGA 배지: 두 분 모두 사진 아래 첫 줄은 `KPGA 투어프로 정회원`, 둘째 줄은 각각 `신재원 프로` / `이주영 원장`. 이주영 원장 이름 바로 아래 자격 문구는 `KPGA 투어프로`로 표기하고 `정회원`은 배지에만 표시함(2026-11-25 사용자 확정).
 
 ## 알려진 이슈
 
