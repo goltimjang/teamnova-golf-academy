@@ -404,7 +404,7 @@ body.is-loaded .hero__badges { transform: none; opacity: 1; }
   font-size: 14.5px; font-weight: 600; color: var(--gold-deep);
 }
 
-/* ─────────── 신재원 프로 ─────────── */
+/* ─────────── 지도진 소개 ─────────── */
 .pro {
   background: var(--bg);
   padding: 130px 0;
@@ -415,6 +415,12 @@ body.is-loaded .hero__badges { transform: none; opacity: 1; }
   gap: clamp(40px, 6vw, 84px);
   align-items: start;
 }
+.pro__layout + .pro__layout {
+  margin-top: clamp(64px, 8vw, 100px);
+  padding-top: clamp(64px, 8vw, 100px);
+  border-top: 1px solid var(--line);
+}
+#lee-jooyoung { scroll-margin-top: 100px; }
 .pro__visual { position: sticky; top: 110px; }
 .pro__photo { position: relative; }
 .pro__photo img {
